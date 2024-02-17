@@ -5,7 +5,7 @@ import cors from 'cors';
 import fs from 'fs'
 import crypto from 'crypto'
 app.use(cors()) // Use this after the variable declaration
-
+import nodemailer from 'nodemailer'
 function signDocument(privateKeyPath, documentPath) {
     // Read the private key
     const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
@@ -51,6 +51,45 @@ function verifySignature(publicKeyPath, documentPath, signature) {
 
     return isSignatureValid;
 }
+app.get("/email", (req, res) => {
+    
+  const email=req.query.param1
+  const filename=req.query.param2
+ 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+      user: 'nkumawat34@gmail.com',
+      pass: 'gycqvhkemgzcirqu'
+  }
+});
+
+
+function sendEmail(email) {
+  
+  const mailOptions = {
+      from: 'nkumawat34@gmail.com',
+      to: email, 
+      subject: "Your Document " +filename+"has uploaded",
+      text: "Your Document has been uploaded on the system "
+  };
+
+  
+  transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+          console.error('Error sending email:', error);
+      } else {
+          console.log('Email sent:', info.response);
+      }
+  });
+}
+
+
+
+sendEmail(email);
+
+ 
+});
 
 
 app.get('/verify_digital_signature', (req, res) => {

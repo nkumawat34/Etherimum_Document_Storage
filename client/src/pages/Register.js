@@ -7,10 +7,10 @@ import { useLocation } from 'react-router-dom';
 import Web3 from 'web3';
 import abi from "./abi_contractaddress";
 import axios from 'axios';
-import { Web3Storage } from 'web3.storage'
+//import { Web3Storage } from 'web3.storage'
 import { FirebaseError } from 'firebase/app';
 import abi_contractaddress from './abi_contractaddress';
-
+import { NFTStorage } from 'nft.storage';
 
 
 
@@ -64,15 +64,27 @@ var usertype= location.state;
 
 const putfile=async (e)=>{
   
-  const client = new Web3Storage({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEQzN2Y5NGQ5ZjlDMGE3YzZCODcwN0NGMzVjYzc0MmZkRmE0MTIxQjUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2OTMwMzUxNjcxNzMsIm5hbWUiOiJCTE9DS0NIQUlOX1BST0pFQ1QifQ.zDGuOoQ1Wtf3dB6KOZeK5712jfzsZ2qCoDgGWZI4AH4"})
-  
-
-
-  const fileInput = document.querySelector('input[type="file"]');
-  // Pack files into a CAR and send to web3.storage
-const rootCid = await client.put(fileInput.files) // Promise<CIDString>
-alert(rootCid)
+  const NFT_STORAGE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDhjQWQ4MTc5MTM3MDJEYUY0OTBGNzIxNmUyY0I0QzVjMjI5Q2QwQjQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTcwNTg5MTUxNzI5MywibmFtZSI6Im10ZWNoZmluYWx5ZWFyIn0.47qts7qFx6EqvEe8LnxvLy_O_vmc6iujr_LipFhYLNg"
+    const client = new NFTStorage({ token: NFT_STORAGE_TOKEN })
+    const fileInput = document.getElementById('f');
+    var rootCid;
     
+      // Get the selected file
+    const selectedFile = fileInput.files[0];
+  
+    // Create a File object
+    const file = new File([selectedFile], selectedFile.name, { type: selectedFile.type });
+     // Create a Blob from the File
+    const someData = new Blob([file]);
+    
+    // Assuming `client.storeBlob` is asynchronous, use try-catch to handle errors
+    try {
+      const cid = await client.storeBlob(someData);
+      alert(cid);
+    } catch (error) {
+      console.error('Error storing Blob:', error);
+    }
+     
   let provider = window.ethereum;
       
   const web3 = new Web3(provider);

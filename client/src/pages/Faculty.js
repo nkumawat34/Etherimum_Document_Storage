@@ -36,7 +36,7 @@ import axios from 'axios';
 import { FirebaseError } from 'firebase/app';
 import abi_contractaddress from './abi_contractaddress';
 import { signInWithEmailAndPassword } from "firebase/auth";
-const IssuerForm = () => {
+const Faculty = () => {
   const navigate = useNavigate();
   const [email,setEmail]=useState("");
   const [password,Setpassword]=useState("");
@@ -49,7 +49,7 @@ alert(email+password)
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in 
-      navigate('/is-registered/issuer',{
+      navigate('/is-registered/faculty',{
         state:email
       })
         
@@ -147,4 +147,4 @@ alert(email+password)
   )
 };
 
-export default IssuerForm;
+export default Faculty;

@@ -8,13 +8,14 @@ import face_recognition
 import cv2
 import os
 import jsonify
-
+import PyPDF2
 import fitz  # PyMuPDF
 import os
 from io import BytesIO
 # Specify the allowed origin
 #they are used for send data from server to client and client to server.They are highly used for api's callings
 cors=CORS(app)
+
 
 @app.route('/', methods = ['GET', 'POST']) 
 def home(): 
@@ -26,8 +27,8 @@ def home():
 @app.route('/myfunction', methods=['GET'])
 def hello():
     # Access query parameters
-    document_cid = request.args.get('document_cid')
-    document_name = request.args.get('document_name')
+    document_cid = request.args.get('param2')
+    document_name = request.args.get('param1')
     print(document_cid,document_name)
     # Check if the parameters are present
    
@@ -122,5 +123,26 @@ def live_face():
   cap.release()
   cv2.destroyAllWindows()
 
-if __name__ == '__main__':  
-   app.run()
+@app.route('/encryptpdf', methods=['GET'])
+def encrypt_pdf():
+
+  input_pdf=request.args.get("param1")
+  output_pdf=request.args.get("param2")
+  password=request.args.get("param3")
+
+  with open(input_pdf, 'rb') as file:
+      pdf_reader = PyPDF2.PdfReader(file)
+      pdf_writer = PyPDF2.PdfWriter()
+
+      for page_num in range(len(pdf_reader.pages)):
+          pdf_writer.add_page(pdf_reader.pages[page_num])
+
+      pdf_writer.encrypt(password)
+
+      with open(output_pdf, 'wb') as output_file:
+          pdf_writer.write(output_file)
+
+  return "Done"
+
+
+app.run()

@@ -16,12 +16,14 @@ import ConnectWalletPage from "./pages/ConnectWalletPage";
 import CertificatePage from "./pages/CertificatePage";
 
 import WarningInstallMetaMask from "./pages/WarningInstallMetaMask";
+import Faculty from "./pages/Faculty";
 
-
-
+import FacultyUploadForm from "./pages/FacultyUploadForm";
 
 
 import Register from "./pages/Register";
+import Uploadform_teacher from "./pages/Uploadform_teacher";
+import Student_Types from "./pages/Student_Types";
 
 
 function App() {
@@ -78,7 +80,17 @@ function App() {
               path="/issuer/new-certificate"
               element={<IssueNewCertiForm />}
             ></Route>
-
+             {/* form for new certificate */}
+             <Route
+              exact
+              path="/faculty/new-document"
+              element={< Uploadform_teacher/>}
+            ></Route>
+            <Route
+              exact
+              path="/is-registered/faculty"
+              element={<FacultyUploadForm />}
+            ></Route>
             {/* displays 3 btns: register as issuer, student, verifier */}
             <Route
               exact
@@ -96,17 +108,37 @@ function App() {
             <Route
               exact
               path="/is-not-registered/student"
-              element={<StudentForm />}
+              element={<Student_Types />}
             ></Route>
             <Route
               exact
               path="/is-not-registered/issuer"
               element={<IssuerForm />}
             ></Route>
+             <Route
+              exact
+              path="/is-not-registered/faculty"
+              element={<Faculty />}
+            ></Route>
             {/* displays certificate details issued to the student */}
             <Route               
               path="/certificate/:uuid"
               element={<CertificatePage />}
+            ></Route>
+             <Route
+              exact
+              path="/is-not-registered/btech"
+              element={<StudentForm />}
+            ></Route>
+             <Route
+              exact
+              path="/is-not-registered/mtech"
+              element={<StudentForm />}
+            ></Route>
+             <Route
+              exact
+              path="/is-not-registered/phd"
+              element={<StudentForm />}
             ></Route>
           </Routes>
         </Router>{" "}

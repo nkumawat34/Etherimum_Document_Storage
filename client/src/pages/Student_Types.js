@@ -1,5 +1,5 @@
-import React from 'react';
-import { useEffect } from 'react';
+import React from 'react'
+
 import FeatureBox from '../components/FeatureBox';
 import {
     Heading,
@@ -18,30 +18,17 @@ import { FcDonate, FcManager, FcFlashOn } from "react-icons/fc";
 import { Link } from 'react-router-dom';
 import Card from '../components/Card';
 import styles from '../styles/Home.module.css'
-import data from '../RegisteredData';
-import { useNavigate } from 'react-router-dom';
-
-
-const RegisteredUserPage = () => {
-
+import data from '../UnRegisteredData1';
+export default function Student_Types() {
+  return (
    
-    const navigate = useNavigate();
-/*
-    useEffect(()=>{
-        if(profile.role == "User"){
-            navigate("/is-registered/student")
-        }else{
-            navigate("/is-registered/issuer")
-        }      
-    },[])
-*/
-    return <div>
-        <main className={styles.main}>
+<>
+<main className={styles.main}>
             <Container py={{ base: "4", md: "12" }} maxW={"7xl"}>
                 <HStack spacing={2}>
                     <SkeletonCircle size="4" />
                     <Heading as="h2" size="lg">
-                        Welcome back!
+                        Register as
                     </Heading>
                 </HStack>
 
@@ -56,8 +43,8 @@ const RegisteredUserPage = () => {
                                     desc={fund.desc}
                                     imageURL={fund.imageURL}
                                     id={fund.id}
-                                    path="is-registered"
                                     ethPrice="NA"
+                                    path="is-not-registered"
                                 />
                             </div>
                         );
@@ -67,7 +54,6 @@ const RegisteredUserPage = () => {
             </Container>
 
         </main>
-    </div>;
-};
-
-export default RegisteredUserPage;
+</>
+  ) 
+}

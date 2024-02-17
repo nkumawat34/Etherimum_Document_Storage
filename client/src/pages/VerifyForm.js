@@ -149,7 +149,7 @@ const requestData = {
                 <Stack spacing={10}>
                   {/* conditional rendering if wallet is  connected will come here */}
                   <Stack spacing={3}>
-                    {!1 ? (
+                    {1 ? (
                       <Button
                         color={"white"}
                         bg={"teal.400"}

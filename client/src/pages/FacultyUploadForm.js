@@ -49,7 +49,7 @@ const qr_code_download=(documentName,documentId)=>{
     })
   
 }
-const IssuerIsRegistered = () => {
+const FacultyUploadForm = () => {
   
   const [certiCount, setCertiCount] = useState(0);
   const [certificates, setCertificates] = useState([]);
@@ -58,6 +58,7 @@ const IssuerIsRegistered = () => {
   var email=location.state
 
   useEffect(() => {
+    alert(email)
     async function fn() {
     
       let provider = window.ethereum;
@@ -90,7 +91,7 @@ const IssuerIsRegistered = () => {
               maxW={"3xl"}
               size={"lg"}
             >
-              You have Issued {certiCount} Certificates
+              You have Issued {certiCount} Documents
             </Heading>
           </Box>
           <Spacer />
@@ -107,13 +108,13 @@ const IssuerIsRegistered = () => {
                 _hover={{
                   bg: "teal.300",
                 }}
-                onClick={()=>{navigate("/issuer/new-certificate",{
+                onClick={()=>{navigate("/faculty/new-document",{
                 state:email
                 }
                 )}}
               >
                 
-                Issue New Certificate
+                Issue New Document
               </Button>
             
           </Box>
@@ -160,4 +161,4 @@ const IssuerIsRegistered = () => {
   );
 };
 
-export default IssuerIsRegistered;
+export default FacultyUploadForm;

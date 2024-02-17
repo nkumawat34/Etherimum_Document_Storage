@@ -24,12 +24,13 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 
 //import { useMetamask } from "../hooks/useMetamask"
-
+//import { create } from 'ipfs-http-client'
 //import { useClient } from "../hooks/useClient";
-import { Web3Storage } from 'web3.storage'
+//import * as Client from '@web3-storage/w3up-client'
 import Web3 from 'web3'
 import axios from "axios";
 import abi from "./abi_contractaddress";
+import { NFTStorage, File } from 'nft.storage'
 const IssuerForm = () => {
   const {
     handleSubmit,
@@ -51,13 +52,43 @@ const IssuerForm = () => {
 
   const storage= async ()=>{
  
-      const client = new Web3Storage({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEQzN2Y5NGQ5ZjlDMGE3YzZCODcwN0NGMzVjYzc0MmZkRmE0MTIxQjUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2OTMwMzUxNjcxNzMsIm5hbWUiOiJCTE9DS0NIQUlOX1BST0pFQ1QifQ.zDGuOoQ1Wtf3dB6KOZeK5712jfzsZ2qCoDgGWZI4AH4"})
 
-      const fileInput = document.getElementById("pdfFile")
+    const NFT_STORAGE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDhjQWQ4MTc5MTM3MDJEYUY0OTBGNzIxNmUyY0I0QzVjMjI5Q2QwQjQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTcwNTg5MTUxNzI5MywibmFtZSI6Im10ZWNoZmluYWx5ZWFyIn0.47qts7qFx6EqvEe8LnxvLy_O_vmc6iujr_LipFhYLNg"
+    const client = new NFTStorage({ token: NFT_STORAGE_TOKEN })
+    const fileInput = document.getElementById('pdfFile');
+    var rootCid;
+    const selectedFile = fileInput.files[0];
+
+    // Create a File object
+    const file = new File([selectedFile], selectedFile.name, { type: selectedFile.type });
+    
+    // Create a Blob from the File
+    const someData = new Blob([file]);
+    
+    // Assuming `client.storeBlob` is asynchronous, use try-catch to handle errors
+    try {
+       rootCid = await client.storeBlob(someData);
+      alert(rootCid);
+    } catch (error) {
+      console.error('Error storing Blob:', error);
+    }
+      // Use the file in your client.store method
+    //  const metadata = await client.store({
+      //  name: 'My Uploaded File',
+       // description: 'A description for the uploaded file',
+       // image: file
+      //});
+      //const url = new URL(metadata.url);
+//const pathSegments = url.pathname.split('/');
+  //      rootCid = pathSegments[pathSegments.length - 2];
+   //   console.log('File uploaded successfully: ', rootCid)
+    //} else {
+      //console.log('Please select a file.');
+    //}
      
      
        // Pack files into a CAR and send to web3.storage
-    const rootCid = await client.put(fileInput.files) // Promise<CIDString>
+   // const rootCid = await client.uploadFile(fileInput.files) // Promise<CIDString>
    
     let provider = window.ethereum;
       
@@ -66,7 +97,16 @@ const IssuerForm = () => {
     const account = accounts[0];
     
     
-    await abi.methods.uploadDocument(issueremail,file,String(rootCid),issueremail,studentemail).send({ from: accounts[0],gas: 300000 });
+    await abi.methods.uploadDocument(issueremail,file.name,String(rootCid),issueremail,studentemail).send({ from: accounts[0],gas: 300000 });
+    const fullPath=(document.getElementById("pdfFile1").value)
+    const startIndex = fullPath.lastIndexOf('\\') + 1; // Find the last backslash position
+    const fileName = fullPath.slice(startIndex); // Get the file name after the last backslash
+    axios.get("http://localhost:3000/email",{
+    params:{
+      param1:issueremail,
+      param2:fileName
+    }
+  })
     
   }
   const getname=()=>{
@@ -76,6 +116,19 @@ const IssuerForm = () => {
     const fileName = fullPath.slice(startIndex); // Get the file name after the last backslash
     setFile(fileName);
   }
+  const encryptpdf=()=>{
+alert("sadas")
+    axios.get("http://127.0.0.1:5000/encryptpdf",{
+      params:{
+        param1:"aa.pdf",
+        param2:"output.pdf",
+        param3:"Nk@12351235"
+      }
+    }).then(response=>{
+      
+    })
+  
+}
   async function onSubmit(data) {
     const fileInput = document.getElementById('pdfFile');
     const imagepath=await abi.methods.getImagePath(issueremail).call()
@@ -86,22 +139,23 @@ const IssuerForm = () => {
 const requestData = {
   param1: fileInput.files[0].name
 }
-/*
+
    // Make a GET request with the data as query parameters
 axios.get('http://localhost:3000/generate_digital_signature', {
   params:requestData
 })
   .then(response => {
     // Handle the response
-    alert(response.data.digitalSignature)
+    console.log(response.data.digitalSignature);
   })
   .catch(error => {
     // Handle errors
     console.error('Error:', error.message);
   });
-*/
+
 
   
+ 
   axios.get('http://127.0.0.1:5000/liveface',{
   params:{
     param1:imagepath.imageID,
@@ -113,11 +167,18 @@ axios.get('http://localhost:3000/generate_digital_signature', {
     if(response.data=="No")
         alert("You cannot upload document")
     else
-      storage()
+      {
+        storage()
+
+
+      }
+
+
+
   })
     
   
-    
+  //storage()
   }
 
   return (
@@ -166,9 +227,13 @@ axios.get('http://localhost:3000/generate_digital_signature', {
 
                 <FormControl id="doc">
                   <FormLabel>File Upload</FormLabel>
-                  <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required onChange={()=>getname()}/>
+                  <input type="file" id="pdfFile1" name="pdfFile" accept=".pdf" required onChange={()=>encryptpdf()}/>
                 </FormControl>
 
+                <FormControl id="doc">
+                  <FormLabel>Encrypted File</FormLabel>
+                  <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required onChange={()=>getname()}/>
+                </FormControl>
                 {error ? (
                   <Alert status="error">
                     <AlertIcon />
