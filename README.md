@@ -8,5 +8,5 @@ This is a document storage platform using Ethereum technology for student and un
                                                               To start the Backend part of the project
 
                                                               Go to the server folder and run these commands 
-                                                              1.   node server.js   (It is wriiten in Node.js)
-                                                              2.   python server1.py (It is wriiten in Flask)
+                                                              1.   node server.js   (It is written in Node.js)
+                                                              2.   python server1.py (It is written in Flask)
