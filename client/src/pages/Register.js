@@ -62,40 +62,61 @@ var usertype= location.state;
       setFile(fileName);
     }
 
-const putfile=async (e)=>{
-  
-  const NFT_STORAGE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDhjQWQ4MTc5MTM3MDJEYUY0OTBGNzIxNmUyY0I0QzVjMjI5Q2QwQjQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTcwNTg5MTUxNzI5MywibmFtZSI6Im10ZWNoZmluYWx5ZWFyIn0.47qts7qFx6EqvEe8LnxvLy_O_vmc6iujr_LipFhYLNg"
-    const client = new NFTStorage({ token: NFT_STORAGE_TOKEN })
-    const fileInput = document.getElementById('f');
-    var rootCid;
+    const storage = async () => {
+      // Pinata JWT Token
+      const PINATA_JWT_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI1ZTNjNjA1MS00Njc2LTQwZjMtODExMC03N2YwNzM5ZDZiYTUiLCJlbWFpbCI6Im5rdW1hd2F0MzRAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siaWQiOiJGUkExIiwiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjF9LHsiaWQiOiJOWUMxIiwiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjF9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6ImZlZmY5MWU4ZWRhY2MzYzk4MjcwIiwic2NvcGVkS2V5U2VjcmV0IjoiMzMyNDcyYjc2ZjM1NThlOGRkNWI4MTdmN2RiNzQ0ZmQzZjhlYWU1OTgwMTcxMDgyZjM5ZDc4NTNkYjIxM2FlMiIsImlhdCI6MTcyNjM3MzY5M30.trKiXBvfDb_m7-fS7Mf4WZnzV6bfW_SrSPgJ7kSRVl0"; // Replace with your Pinata JWT token
     
-      // Get the selected file
-    const selectedFile = fileInput.files[0];
-  
-    // Create a File object
-    const file = new File([selectedFile], selectedFile.name, { type: selectedFile.type });
-     // Create a Blob from the File
-    const someData = new Blob([file]);
+      // Get the file from the input
+      const fileInput = document.getElementById('f');
+      const selectedFile = fileInput.files[0];
     
-    // Assuming `client.storeBlob` is asynchronous, use try-catch to handle errors
-    try {
-      const cid = await client.storeBlob(someData);
-      alert(cid);
-    } catch (error) {
-      console.error('Error storing Blob:', error);
-    }
-     
-  let provider = window.ethereum;
-      
-  const web3 = new Web3(provider);
-  const accounts = await web3.eth.getAccounts();
-
-  await abi.methods.setImageID_Name(email,String(rootCid),file).send({ from: accounts[0],gas: 300000 });
-  
+      if (!selectedFile) {
+        alert('Please select a file.');
+        return;
+      }
     
-    }
+      // Create FormData for the file upload
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+    
+      // Pinata API request options
+      const options = {
+        method: 'POST',
+        headers: {
+          'Authorization': PINATA_JWT_TOKEN, // Add Pinata JWT for authentication
+        },
+        body: formData,
+      };
+    
+      try {
+        // Upload file to Pinata
+     //   const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', options);
+        
+        // Check if the response is ok
+       // if (!response.ok) {
+        //  throw new Error(`Error uploading file: ${response.statusText}`);
+        //}
+    
+        //const result = await response.json();
+        //const rootCid = result.IpfsHash; // Extract CID from the response
+        //alert(`File uploaded successfully! CID: ${rootCid}`);
+    
+        // Now that you have the CID, you can interact with the blockchain
+        let provider = window.ethereum;
+        const web3 = new Web3(provider);
+        const accounts = await web3.eth.getAccounts();
+        
+        // Assuming `abi` and `email` are defined elsewhere in your code
+        await abi.methods.setImageID_Name(email, String("QmZd5tugUUcG3FoMahgDNdRo9Hzb98Xm2otKbVtvFheCvv"),selectedFile.name).send({ from: accounts[0], gas: 300000 });
+        alert("accountd")
+        } catch (error) {
+        console.error('Error uploading file to Pinata:', error);
+      }
+    };
+    
 const signup= async ()=>{
 
+  /*
   if(password!=repassword)
     {
       alert("Sorry you have entererd wrong password");
@@ -103,21 +124,19 @@ const signup= async ()=>{
     }
    
     let provider = window.ethereum;
-    
-      await provider.request({ method: "eth_requestAccounts" });
-      const web3 = new Web3(provider);
-      const accounts = await web3.eth.getAccounts();
-      const account = accounts[0];
+    const web3 = new Web3(provider);
+    const accounts = await web3.eth.getAccounts();
+    const account = accounts[0];
     
    
    
       
       if(usertype!="student")
       await abi.methods.registerUser(email).send({ from: accounts[0] });
-      
-      putfile()
+    */  
+      storage()
     
-   
+   /*
   
   createUserWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
@@ -137,7 +156,7 @@ const signup= async ()=>{
     const errorMessage = error.message;
     // ..
   });
-  
+  */
 }
 
   return (

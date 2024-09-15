@@ -1,6 +1,6 @@
 import web3 from './web3.js'
 
-const contractAddress = "0x3Dd952a9f6632A28E7cf2440Bb22De56347B60C8";
+const contractAddress = "0x3D0d72555e54FbdE822C635216ef9CbA6806924E";
 
 const contractABI =[
 	{

@@ -20,7 +20,6 @@ import Faculty from "./pages/Faculty";
 
 import FacultyUploadForm from "./pages/FacultyUploadForm";
 
-
 import Register from "./pages/Register";
 import Uploadform_teacher from "./pages/Uploadform_teacher";
 import Student_Types from "./pages/Student_Types";

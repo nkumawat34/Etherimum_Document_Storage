@@ -18,7 +18,7 @@ export default function Login() {
   
  
  const signin=()=>{
-alert(email+password)
+
 
   const auth = getAuth();
   signInWithEmailAndPassword(auth, email, password)

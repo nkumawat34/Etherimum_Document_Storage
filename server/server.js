@@ -55,7 +55,7 @@ app.get("/email", (req, res) => {
     
   const email=req.query.param1
   const filename=req.query.param2
- 
+  console.log(email,filename)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
