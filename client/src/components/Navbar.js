@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Flex,
@@ -16,12 +16,23 @@ import {
   MenuItem,
 } from "@chakra-ui/react";
 import DarkModeSwitch from "./DarkModeSwitch";
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-//import { useProfile } from "../hooks/useProfile";
+
 
 const Navbar = () => {
-  //const { profile } = useProfile();
+
+  const navigate=useNavigate()
+
+  const logout=()=>{
+
+    const email=localStorage.getItem("email")
+    localStorage.removeItem("email")
+    navigate("/")
+  }
+
+  
+ 
   return (
     <Box>
       <Flex
@@ -84,12 +95,15 @@ const Navbar = () => {
             spacing={6}
             display={{ base: "none", md: "flex" }}
           >
-           
+           {localStorage.getItem("email")?<div><button className="p-3 bg-red-400 rounded-full" onClick={()=>logout()}>Logout</button></div>:""}
             <DarkModeSwitch />
+          
           </Stack>
+          
           <Flex display={{ base: "flex", md: "none" }}>
             <DarkModeSwitch />
           </Flex>
+          
         </Container>
       </Flex>
     </Box>

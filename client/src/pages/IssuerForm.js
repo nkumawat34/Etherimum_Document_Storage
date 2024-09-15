@@ -48,11 +48,13 @@ alert(email+password)
   const auth = getAuth();
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
+
+      localStorage.setItem("email",email)
       // Signed in 
       navigate('/is-registered/issuer',{
         state:email
       })
-        
+     
       // ...
     })
     .catch((error) => {

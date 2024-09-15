@@ -35,6 +35,7 @@ import abi from "./abi_contractaddress";
 import { useLocation } from "react-router-dom";
 const qr_code_download=(documentName,documentId)=>{
 
+  
 
   axios.get('http://127.0.0.1:5000/myfunction',{
     params:{
@@ -44,7 +45,7 @@ const qr_code_download=(documentName,documentId)=>{
     }})
     .then(response=>{
       //Handle erros
-      alert("asd")
+     alert("qr code downloaded")
       
     })
   
@@ -146,7 +147,7 @@ const IssuerIsRegistered = () => {
                     {/* <Td>Sem-6 Marksheet</Td> */}
                     <Td>{cert.issuedFor}</Td>
                     <Td>
-                    <a href={"https://ipfs.io/ipfs/"+cert.documentId} target={'_blank'} className="btn btn-primary">Download</a>
+                    <a href={"https://gateway.pinata.cloud/ipfs/"+cert.documentId} target={'_blank'} className="btn btn-primary">Download</a>
                     </Td>
                     <Td><button className="btn btn-primary" onClick={()=>qr_code_download(cert.documentName,cert.documentId)}>Download</button></Td>
                   </Tr>

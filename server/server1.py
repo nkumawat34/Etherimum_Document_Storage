@@ -9,7 +9,7 @@ import cv2
 import os
 import jsonify
 import PyPDF2
-import fitz  # PyMuPDF
+#import fitz  # PyMuPDF
 import os
 from io import BytesIO
 # Specify the allowed origin
@@ -34,33 +34,32 @@ def hello():
    
 
     # Your code to process the query parameters goes here
-    result = my_function(document_cid+".ipfs.w3s.link"+"/"+document_name)
+    result = my_function("https://gateway.pinata.cloud/ipfs/"+document_cid)
 
     # Return a response
     return "Done"
 
 def my_function(url):
+    # Replace this with your IPFS CID
+    ipfs_cid = url
   
-  # Replace this with your IPFS CID
-  ipfs_cid = url
-  
-  # Create a QR code
-  qr = qrcode.QRCode(
-    version=1,
-    error_correction=qrcode.constants.ERROR_CORRECT_L,
-    box_size=10,
-    border=4,
-)
-  qr.add_data(ipfs_cid)
-  qr.make(fit=True)
+    # Create a QR code
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(ipfs_cid)
+    qr.make(fit=True)
 
-  # Create an image of the QR code
-  img = qr.make_image(fill_color="black", back_color="white")
+    # Create an image of the QR code
+    img = qr.make_image(fill_color="black", back_color="white")
 
-  # Save or display the image
-  img.save("IPFS"+".png")  # Save the image to a file
-  img.show()  # Display the image
-  return "Done"
+    # Save the image to a BytesIO object
+    img_io = io.BytesIO()
+    img.save(img_io, 'PNG')
+    img_io.seek(0)  # Move the pointer to the start of the file
 
 
 
@@ -72,10 +71,9 @@ def live_face():
   print(document_cid)
   # URL of the image you want to compare against
   
-  image_url = "https://ipfs.io/ipfs/"
+  image_url = "https://gateway.pinata.cloud/ipfs/"
   image_url+=str(document_cid)
-  image_url+='/'
-  image_url+=str(document_name)
+ 
   print(image_url)
 # Download the image from the URL
   response = requests.get(image_url)

@@ -49,6 +49,7 @@ alert(email+password)
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in 
+      localStorage.setItem("email",email)
       navigate('/is-registered/faculty',{
         state:email
       })

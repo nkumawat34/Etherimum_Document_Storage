@@ -18,12 +18,14 @@ export default function Login() {
   
  
  const signin=()=>{
-alert(email+password)
+
 
   const auth = getAuth();
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in 
+     
+      localStorage.setItem("email",email)
       navigate('/is-registered/student',{
         state:email
       })
