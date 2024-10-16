@@ -17,12 +17,10 @@ from io import BytesIO
 cors=CORS(app)
 
 
-@app.route('/', methods = ['GET', 'POST']) 
+@app.route('/', methods = ['GET']) 
 def home(): 
-    if(request.method == 'GET'): 
-  
-        data = "hello world"
-        return data
+    data = "hello world"
+    return data
 
 @app.route('/myfunction', methods=['GET'])
 def hello():
