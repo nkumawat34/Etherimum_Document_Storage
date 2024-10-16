@@ -1,7 +1,7 @@
 **Note:** MetaMask extension must be installed on your system.
 
 This  is a document storage platform using Ethereum technology for student and university.Four entities will be included student, verifier(third parties),issuer(university) and teacher.For verification of documents, here we are using technology digital signature for encryption and decryption.Face recognition for verification of issuer.Encryption of documents have done with password.Email Service also built for the acknowledgement regarding document upload.
-IPFS gateway implementaion using NFT.storage.
+IPFS gateway implementaion using Pinata Sdk APi.
 
                                                               To start the Frontend part ofthe project
 
