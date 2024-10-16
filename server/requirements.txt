@@ -1,3 +1,5 @@
+opencv-python
+jsonify
 flask
 qrcode[pil]
 requests
