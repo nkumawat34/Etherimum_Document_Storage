@@ -17,12 +17,10 @@ import io  # Import io for BytesIO
 cors=CORS(app)
 
 
-@app.route('/', methods = ['GET', 'POST']) 
+@app.route('/', methods = ['GET']) 
 def home(): 
-    if(request.method == 'GET'): 
-  
-        data = "hello world"
-        return data
+    data = "hello world"
+    return data
 
 @app.route('/myfunction', methods=['GET'])
 def hello():
@@ -152,4 +150,9 @@ def encrypt_pdf():
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'pdf'
 
-app.run()
+if __name__ == "__main__":
+    # Get the port from the environment variable (default to 5000 if not set)
+    port = int(os.environ.get('PORT', 5000))
+    
+    # Bind to 0.0.0.0 and use the environment port
+    app.run(host='0.0.0.0', port=port)
