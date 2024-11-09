@@ -1,4 +1,4 @@
-from flask import Flask,request
+from flask import Flask,request,send_file
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -11,7 +11,7 @@ import jsonify
 import PyPDF2
 #import fitz  # PyMuPDF
 import os
-from io import BytesIO
+import io  # Import io for BytesIO
 # Specify the allowed origin
 #they are used for send data from server to client and client to server.They are highly used for api's callings
 cors=CORS(app)
@@ -32,12 +32,10 @@ def hello():
     print(document_cid,document_name)
     # Check if the parameters are present
    
-
     # Your code to process the query parameters goes here
-    result = my_function("https://gateway.pinata.cloud/ipfs/"+document_cid)
-
-    # Return a response
-    return "Done"
+    img_io = my_function("https://gateway.pinata.cloud/ipfs/"+document_cid)
+    return send_file(img_io, mimetype='image/png', as_attachment=True, download_name='qr_code.png')
+    
 
 def my_function(url):
     # Replace this with your IPFS CID
@@ -60,7 +58,7 @@ def my_function(url):
     img_io = io.BytesIO()
     img.save(img_io, 'PNG')
     img_io.seek(0)  # Move the pointer to the start of the file
-
+    return img_io
 
 
 
@@ -78,7 +76,7 @@ def live_face():
 # Download the image from the URL
   response = requests.get(image_url)
   
-  known_image = face_recognition.load_image_file(BytesIO(response.content))
+  known_image = face_recognition.load_image_file(io.BytesIO(response.content))
   known_face_encoding = face_recognition.face_encodings(known_image)[0]
 
   # Initialize the webcam
@@ -121,26 +119,37 @@ def live_face():
   cap.release()
   cv2.destroyAllWindows()
 
-@app.route('/encryptpdf', methods=['GET'])
+@app.route('/encryptpdf', methods=['POST'])
 def encrypt_pdf():
+    if 'file' not in request.files:
+        return {'success': False, 'message': 'No file part in the request.'}, 400
 
-  input_pdf=request.args.get("param1")
-  output_pdf=request.args.get("param2")
-  password=request.args.get("param3")
+    file = request.files['file']
+    output_pdf = request.form.get('param2')  # You can specify the output file name
+    password = request.form.get('param3')
 
-  with open(input_pdf, 'rb') as file:
-      pdf_reader = PyPDF2.PdfReader(file)
-      pdf_writer = PyPDF2.PdfWriter()
+    if file.filename == '':
+        return {'success': False, 'message': 'No selected file.'}, 400
 
-      for page_num in range(len(pdf_reader.pages)):
-          pdf_writer.add_page(pdf_reader.pages[page_num])
+    if file and allowed_file(file.filename):  # Implement allowed_file to check for PDF
+        with open(file.filename, 'rb') as input_pdf:
+            pdf_reader = PyPDF2.PdfReader(input_pdf)
+            pdf_writer = PyPDF2.PdfWriter()
 
-      pdf_writer.encrypt(password)
+            for page_num in range(len(pdf_reader.pages)):
+                pdf_writer.add_page(pdf_reader.pages[page_num])
 
-      with open(output_pdf, 'wb') as output_file:
-          pdf_writer.write(output_file)
+            pdf_writer.encrypt(password)
 
-  return "Done"
+            # Save the encrypted PDF
+            with open(output_pdf, 'wb') as output_file:
+                pdf_writer.write(output_file)
 
+        return {'success': True, 'message': 'PDF encrypted successfully.'}
+
+    return {'success': False, 'message': 'Invalid file type.'}, 400
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'pdf'
 
 app.run()

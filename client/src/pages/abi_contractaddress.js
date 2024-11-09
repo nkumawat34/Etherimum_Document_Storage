@@ -1,6 +1,6 @@
 import web3 from './web3.js'
 
-const contractAddress = "0x3D0d72555e54FbdE822C635216ef9CbA6806924E";
+const contractAddress = "0x4AbFbB66B3A906FD7a989BDFc1810a3F9477A8BA";
 
 const contractABI =[
 	{
@@ -38,17 +38,17 @@ const contractABI =[
 		"inputs": [
 			{
 				"internalType": "string",
-				"name": "email",
+				"name": "_email",
 				"type": "string"
 			},
 			{
 				"internalType": "string",
-				"name": "imageID",
+				"name": "_imageID",
 				"type": "string"
 			},
 			{
 				"internalType": "string",
-				"name": "imageName",
+				"name": "_imageName",
 				"type": "string"
 			}
 		],
@@ -76,12 +76,22 @@ const contractABI =[
 			},
 			{
 				"internalType": "string",
-				"name": "issuedBy",
+				"name": "_documentHash",
 				"type": "string"
 			},
 			{
 				"internalType": "string",
-				"name": "issuedFor",
+				"name": "_documentSignature",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_issuedBy",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_issuedFor",
 				"type": "string"
 			}
 		],
@@ -92,7 +102,7 @@ const contractABI =[
 	},
 	{
 		"inputs": [],
-		"name": "getallUsers",
+		"name": "getAllUsers",
 		"outputs": [
 			{
 				"components": [
@@ -110,7 +120,17 @@ const contractABI =[
 							},
 							{
 								"internalType": "string",
-								"name": "documentId",
+								"name": "documentCId",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "documentHash",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "documentSignature",
 								"type": "string"
 							},
 							{
@@ -166,7 +186,17 @@ const contractABI =[
 					},
 					{
 						"internalType": "string",
-						"name": "documentId",
+						"name": "documentCId",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "documentHash",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "documentSignature",
 						"type": "string"
 					},
 					{
@@ -192,7 +222,7 @@ const contractABI =[
 		"inputs": [
 			{
 				"internalType": "string",
-				"name": "email",
+				"name": "_email",
 				"type": "string"
 			}
 		],
@@ -261,6 +291,30 @@ const contractABI =[
 			{
 				"internalType": "string",
 				"name": "imageName",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_email",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_documentHash",
+				"type": "string"
+			}
+		],
+		"name": "verifyDocument",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
 				"type": "string"
 			}
 		],

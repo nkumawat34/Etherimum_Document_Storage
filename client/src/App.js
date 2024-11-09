@@ -120,10 +120,7 @@ function App() {
               element={<Faculty />}
             ></Route>
             {/* displays certificate details issued to the student */}
-            <Route               
-              path="/certificate/:uuid"
-              element={<CertificatePage />}
-            ></Route>
+           
              <Route
               exact
               path="/is-not-registered/btech"

@@ -30,29 +30,6 @@ const [name,setName]=useState("")
 
 const auth = getAuth();
 var usertype= location.state;
-//This Fucntion is used for add data into firestore
-  const user1=async (email,password,name)=>
-  {
-    
-      try {
-        alert("Hello")
-        const docRef = await addDoc(collection(storage, "Users"), {
-          email: email,
-          password: password,
-         name: name,
-          documents:[],
-        
-        });
-        console.log("Document written with ID: ", docRef.id);
-      } catch (e) {
-        console.error("Error adding document: ", e);
-      } 
-    }
-    
-  
-
-  
-
 
     const getname=()=>{
 
@@ -87,28 +64,30 @@ var usertype= location.state;
         },
         body: formData,
       };
-    
+      let rootCid;
+      
       try {
         // Upload file to Pinata
-     //   const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', options);
+        const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', options);
+        const result = await response.json();
+        rootCid = result.IpfsHash; // Extract CID from the response
+        alert(`File uploaded successfully! CID: ${rootCid}`);
+      } catch (error) {
+        console.error('Error uploading file to Pinata:', error);
+        return;
+      }
         
-        // Check if the response is ok
-       // if (!response.ok) {
-        //  throw new Error(`Error uploading file: ${response.statusText}`);
-        //}
-    
-        //const result = await response.json();
-        //const rootCid = result.IpfsHash; // Extract CID from the response
-        //alert(`File uploaded successfully! CID: ${rootCid}`);
-    
-        // Now that you have the CID, you can interact with the blockchain
+      try {
+      
         let provider = window.ethereum;
         const web3 = new Web3(provider);
         const accounts = await web3.eth.getAccounts();
-        
+        const account=accounts[0]
+       // alert("Hi")
+        //console.log(account)
         // Assuming `abi` and `email` are defined elsewhere in your code
-        await abi.methods.setImageID_Name(email, String("QmZd5tugUUcG3FoMahgDNdRo9Hzb98Xm2otKbVtvFheCvv"),selectedFile.name).send({ from: accounts[0], gas: 300000 });
-        alert("accountd")
+        await abi.methods.setImageID_Name(email,String(rootCid),selectedFile.name).send({ from: account});
+       
         } catch (error) {
         console.error('Error uploading file to Pinata:', error);
       }
@@ -128,7 +107,7 @@ const signup= async ()=>{
     const accounts = await web3.eth.getAccounts();
     const account = accounts[0];
     
-   
+    
    
       
       if(usertype!="student")
@@ -136,8 +115,7 @@ const signup= async ()=>{
      
       storage()
     
-   /*
-  
+   
   createUserWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
     // Signed in s
@@ -147,7 +125,7 @@ const signup= async ()=>{
     
     //user1(email,password,name)
     
-    // ...
+    
   })
   .catch((error) => {
     
@@ -156,7 +134,7 @@ const signup= async ()=>{
     const errorMessage = error.message;
     // ..
   });
-  */
+  
 }
 
   return (

@@ -4,43 +4,42 @@ pragma solidity ^0.8.0;
 contract EtherDocs {
     // Structure to represent a document
     struct Document {
-        string documentName; // Name of the document
-        string documentId;   // Unique ID for the document (as a string)
+        string documentName;        // Name of the document
+        string documentCId;          // Unique ID for the document
+        string documentHash;        // Hash of the document (calculated off-chain)
+        string documentSignature;   // Digital signature of the document
         string issuedBy;
         string issuedFor;
     }
 
     // Structure to represent a user
     struct User {
-        string email;          // User's email address
-        Document[] documents;  // Array of documents
+        string email;               // User's email address
+        Document[] documents;       // Array of documents
         string imageID;
         string imageName;
     }
 
-    //Structure for image
-    struct Image
-    {
+    // Structure to represent an image
+    struct Image {
         string imageID;
         string imageName;
-
     }
 
     // Mapping from user email to User struct
     mapping(string => User) public users;
     string[] public user_emails;
-    // Function to register a new user
-    function getallUsers() public view returns(User[] memory)
-    { User[] memory users1 = new User[](user_emails.length);
 
+    // Function to get all registered users
+    function getAllUsers() public view returns (User[] memory) {
+        User[] memory usersList = new User[](user_emails.length);
         for (uint i = 0; i < user_emails.length; i++) {
-           
-            users1[i] = users[user_emails[i]];
+            usersList[i] = users[user_emails[i]];
         }
-
-        return users1;
-
+        return usersList;
     }
+
+    // Function to register a new user
     function registerUser(string memory _email) public {
         require(bytes(_email).length > 0, "Email must not be empty");
         require(bytes(users[_email].email).length == 0, "User already registered");
@@ -51,16 +50,50 @@ contract EtherDocs {
     }
 
     // Function to upload a document for a user
-    function uploadDocument(string memory _email, string memory _documentName, string memory _documentId,string memory issuedBy,string memory issuedFor) public {
+    function uploadDocument(
+        string memory _email,
+        string memory _documentName,
+        string memory _documentId,
+        string memory _documentHash,
+        string memory _documentSignature,
+        string memory _issuedBy,
+        string memory _issuedFor
+    ) public {
         require(bytes(_email).length > 0, "Email must not be empty");
         require(bytes(_documentName).length > 0, "Document name must not be empty");
         require(bytes(_documentId).length > 0, "Document ID must not be empty");
+        require(bytes(_documentHash).length > 0, "Document hash must not be empty");
+        require(bytes(_documentSignature).length > 0, "Document signature must not be empty");
         require(bytes(users[_email].email).length > 0, "User must be registered");
-         require(bytes(issuedBy).length > 0, "issuedBy must not be empty");
-          require(bytes(issuedFor).length > 0, "issuedFor must not be empty");
+
         User storage user = users[_email];
-        Document memory newDocument = Document(_documentName, _documentId,issuedBy,issuedFor);
+        Document memory newDocument = Document(
+            _documentName,
+            _documentId,
+            _documentHash,
+            _documentSignature,
+            _issuedBy,
+            _issuedFor
+        );
         user.documents.push(newDocument);
+    }
+
+    // Function to verify a document based on document hash
+    function verifyDocument(
+        string memory _email,
+        string memory _documentHash
+    ) public view returns (string memory) {
+        require(bytes(_email).length > 0, "Email must not be empty");
+        require(bytes(_documentHash).length > 0, "Document hash must not be empty");
+
+        User storage user = users[_email];
+        for (uint256 i = 0; i < user.documents.length; i++) {
+            if (keccak256(bytes(user.documents[i].documentHash)) == keccak256(bytes(_documentHash))) {
+                // Return the signature of the matching document
+                return user.documents[i].documentSignature;
+            }
+        }
+        revert("Document not found or hash mismatch");
     }
 
     // Function to get the list of documents for a user
@@ -72,11 +105,11 @@ contract EtherDocs {
     function deleteDocument(string memory _email, string memory _documentId) public {
         require(bytes(_email).length > 0, "Email must not be empty");
         require(bytes(_documentId).length > 0, "Document ID must not be empty");
-        
+
         User storage user = users[_email];
         for (uint256 i = 0; i < user.documents.length; i++) {
-            if (keccak256(bytes(user.documents[i].documentId)) == keccak256(bytes(_documentId))) {
-                // Found the matching document, remove it
+            if (keccak256(bytes(user.documents[i].documentCId)) == keccak256(bytes(_documentId))) {
+                // Shift elements to overwrite the target document
                 for (uint256 j = i; j < user.documents.length - 1; j++) {
                     user.documents[j] = user.documents[j + 1];
                 }
@@ -84,23 +117,21 @@ contract EtherDocs {
                 return;
             }
         }
+        revert("Document not found");
     }
-    function setImageID_Name(string memory email,string memory imageID,string memory imageName) public{
 
-        User storage user = users[email];
-        user.imageID=imageID;
-        user.imageName=imageName;
+    // Function to set image ID and name for a user
+    function setImageID_Name(string memory _email, string memory _imageID, string memory _imageName) public {
+        require(bytes(_email).length > 0, "Email must not be empty");
 
+        User storage user = users[_email];
+        user.imageID = _imageID;
+        user.imageName = _imageName;
     }
-    function getImagePath(string memory email) public  view returns (Image memory){
 
-         User storage user = users[email];
-
-        Image memory image =Image(user.imageID,user.imageName);
-
-        return image;
-        
-      
-
+    // Function to get the image path for a user
+    function getImagePath(string memory _email) public view returns (Image memory) {
+        User storage user = users[_email];
+        return Image(user.imageID, user.imageName);
     }
 }

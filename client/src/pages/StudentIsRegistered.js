@@ -42,7 +42,7 @@ const StudentIsRegistered = () => {
         const accounts = await web3.eth.getAccounts();
       const account = accounts[0];
       
-       let res=await abi.methods.getallUsers().call();
+       let res=await abi.methods.getAllUsers().call();
        
        let res1=[];
       
@@ -65,7 +65,7 @@ const StudentIsRegistered = () => {
        setCertiCount(res1.length);
     }
     fn();
-  });
+  },[]);
 
   return (
     <main className={styles.main}>
@@ -102,9 +102,9 @@ const StudentIsRegistered = () => {
                 return (
                   <Tr>
                     <Td>{cert.documentName}</Td>
-                    <Td>{cert.documentId}</Td>
+                    <Td>{cert.documentCId}</Td>
                     <Td>{cert.issuedBy}</Td>
-                    <Td><a href={"https://ipfs.io/ipfs/"+cert.documentId} target={'_blank'} className="btn btn-primary">Download</a></Td>
+                    <Td><a href={"https://gateway.pinata.cloud/ipfs/"+cert.documentCId} target={'_blank'} className="btn btn-primary">Download</a></Td>
                     {/* <Td>Sem-6 Marksheet</Td> */}
                    
                    

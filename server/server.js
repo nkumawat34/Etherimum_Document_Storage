@@ -6,6 +6,7 @@ import fs from 'fs'
 import crypto from 'crypto'
 app.use(cors()) // Use this after the variable declaration
 import nodemailer from 'nodemailer'
+
 function signDocument(privateKeyPath, documentPath) {
     // Read the private key
     const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
@@ -27,11 +28,11 @@ app.get('/hello',(req,res)=>{
 app.get('/generate_digital_signature', (req, res) => {
 
     const privateKeyPath = 'private_key.pem';
-    console.log(req.query.param1)
+    //console.log(req.query.param1)
 const documentPath = String(req.query.param1);
 
 const digitalSignature = signDocument(privateKeyPath, documentPath);
-console.log(digitalSignature)
+//console.log(digitalSignature)
   res.json({ digitalSignature: digitalSignature });
 });
 
@@ -60,8 +61,9 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
       user: 'nkumawat34@gmail.com',
-      pass: 'gycqvhkemgzcirqu'
-  }
+      pass: 'gzeghomqbdphbacx'
+  },
+  
 });
 
 
@@ -100,6 +102,48 @@ const digitalSignature = String(req.query.param2); // Provide the digital signat
 const isSignatureValid = verifySignature(publicKeyPath, documentPath, digitalSignature);
     res.json({ isSignatureValid: isSignatureValid });
   });
+
+// Helper function to create SHA-256 hash of a file
+function hashDocument(filePath) {
+  // Create a hash object
+  const hash = crypto.createHash('sha256');
+
+  // Read the file and update the hash
+  const fileBuffer = fs.readFileSync(filePath);
+  hash.update(fileBuffer);
+
+  // Return the hexadecimal hash value
+  return hash.digest('hex');
+}
+
+// Create an endpoint to generate document hash
+app.get('/create_hash_document', (req, res) => {
+  // Get file path from query parameter
+  const { filePath } = req.query;
+
+  // Check if file path is provided
+  if (!filePath) {
+      return res.status(400).send('Please provide a file path');
+  }
+
+  // Check if the file exists
+  if (!fs.existsSync(filePath)) {
+      return res.status(404).send('File not found');
+  }
+
+  try {
+      // Generate the hash for the document
+      const documentHash = hashDocument(filePath);
+
+      // Return the document hash
+      res.status(200).json({
+          message: 'Document hash generated successfully',
+          documentHash: documentHash,
+      });
+  } catch (error) {
+      res.status(500).send('Error generating document hash');
+  }
+}); 
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

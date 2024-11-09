@@ -33,23 +33,40 @@ import axios from "axios";
 import Web3 from 'web3'
 import abi from "./abi_contractaddress";
 import { useLocation } from "react-router-dom";
-const qr_code_download=(documentName,documentId)=>{
 
-  
+const qr_code_download = (documentName, documentId) => {
+  axios.get('http://127.0.0.1:5000/myfunction', {
+      params: {
+          param1: documentName,
+          param2: documentId
+      },
+      responseType: 'blob' // Important to specify that you're expecting a binary file
+  })
+  .then(response => {
+      // Create a Blob from the PDF Stream
+      const url = window.URL.createObjectURL(new Blob([response.data]));
 
-  axios.get('http://127.0.0.1:5000/myfunction',{
-    params:{
-      param1:documentName,
-      param2:documentId
-  
-    }})
-    .then(response=>{
-      //Handle erros
-     alert("qr code downloaded")
-      
-    })
-  
-}
+      // Create a link element
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'qr_code.png'); // Specify the file name for download
+
+      // Append to body
+      document.body.appendChild(link);
+
+      // Programmatically click the link to trigger the download
+      link.click();
+
+      // Clean up and remove the link
+      link.remove();
+
+      alert("QR code downloaded");
+  })
+  .catch(error => {
+      console.error("Error downloading the QR code:", error);
+      alert("Failed to download QR code");
+  });
+};
 const IssuerIsRegistered = () => {
   
   const [certiCount, setCertiCount] = useState(0);
@@ -59,24 +76,38 @@ const IssuerIsRegistered = () => {
   var email=location.state
 
   useEffect(() => {
-    async function fn() {
-    
-      let provider = window.ethereum;
-      
-      const web3 = new Web3(provider);
-      
-      const accounts = await web3.eth.getAccounts();
-    const account = accounts[0];
-   
-     let res= await abi.methods.getDocuments(email).call();
-    
-     setCertificates(res);
-     setCertiCount(res.length);
-    }
-   
-    fn();
-  },[]);
+    async function fetchDocuments() {
+        try {
+            // Check if the Ethereum provider is available
+            if (typeof window.ethereum !== 'undefined') {
+                const provider = window.ethereum;
 
+                // Request account access if needed
+                await provider.request({ method: 'eth_requestAccounts' });
+
+                // Create a new Web3 instance
+                const web3 = new Web3(provider);
+
+                // Get the user's accounts
+                const accounts = await web3.eth.getAccounts();
+                const account = accounts[0];
+
+                // Call the smart contract method
+                const res = await abi.methods.getDocuments(email).call({ from: account });
+
+                // Update state with the retrieved documents
+                setCertificates(res);
+                setCertiCount(res.length);
+            } else {
+                console.error('Ethereum provider is not available. Make sure you have MetaMask installed.');
+            }
+        } catch (error) {
+            console.error('Error fetching documents:', error);
+        }
+    }
+
+    fetchDocuments();
+}, [email]); // Added email as a dependency to refetch if it changes
   return (
     <main className={styles.main}>
       <Container py={{ base: "10", md: "12" }} maxW={"7xl"}>
@@ -143,13 +174,15 @@ const IssuerIsRegistered = () => {
                 return (
                   <Tr key={cert.documentId}>
                     <Td>{cert.documentName}</Td>
-                    <Td>{cert.documentId}</Td>
+                    <Td>{cert.documentCId}</Td>
                     {/* <Td>Sem-6 Marksheet</Td> */}
                     <Td>{cert.issuedFor}</Td>
+                    
                     <Td>
-                    <a href={"https://gateway.pinata.cloud/ipfs/"+cert.documentId} target={'_blank'} className="btn btn-primary">Download</a>
+
+                    <a href={"https://gateway.pinata.cloud/ipfs/"+cert.documentCId} target={'_blank'} className="btn btn-primary">Download</a>
                     </Td>
-                    <Td><button className="btn btn-primary" onClick={()=>qr_code_download(cert.documentName,cert.documentId)}>Download</button></Td>
+                    <Td><button className="btn btn-primary" onClick={()=>qr_code_download(cert.documentName,cert.documentCId)}>Download</button></Td>
                   </Tr>
                 );
               })}

@@ -44,7 +44,7 @@ const qr_code_download=(documentName,documentId)=>{
     }})
     .then(response=>{
       //Handle erros
-      alert("asd")
+      
       
     })
   
@@ -114,7 +114,7 @@ const FacultyUploadForm = () => {
                 )}}
               >
                 
-                Issue New Document
+                Upload New Document
               </Button>
             
           </Box>

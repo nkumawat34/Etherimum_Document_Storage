@@ -47,11 +47,11 @@ const IssuerForm = () => {
   const navigate = useNavigate();
   //const { isConnected } = useMetamask();
   const [studentemail,setEmail]=useState("")
-  const [digitalsignature,setDigitalSignature]=useState("")
   var location=useLocation()
   const [issueremail,setIssuermail]=useState(location.state)
-
-  const storage = async () => {
+  const [password,setPassword]=useState('')
+  const storage = async (digitalSignature,documentHash) => {
+    
     
     // Pinata JWT Token
     const PINATA_JWT_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI1ZTNjNjA1MS00Njc2LTQwZjMtODExMC03N2YwNzM5ZDZiYTUiLCJlbWFpbCI6Im5rdW1hd2F0MzRAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siaWQiOiJGUkExIiwiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjF9LHsiaWQiOiJOWUMxIiwiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjF9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6ImZlZmY5MWU4ZWRhY2MzYzk4MjcwIiwic2NvcGVkS2V5U2VjcmV0IjoiMzMyNDcyYjc2ZjM1NThlOGRkNWI4MTdmN2RiNzQ0ZmQzZjhlYWU1OTgwMTcxMDgyZjM5ZDc4NTNkYjIxM2FlMiIsImlhdCI6MTcyNjM3MzY5M30.trKiXBvfDb_m7-fS7Mf4WZnzV6bfW_SrSPgJ7kSRVl0"; // Replace with your Pinata JWT token
@@ -96,22 +96,29 @@ const IssuerForm = () => {
     const web3 = new Web3(provider);
     const accounts = await web3.eth.getAccounts();
     const account = accounts[0];
-  
+
+    console.log("issueremail-"+issueremail+"\n"+"File Name-"+selectedFile.name+
+      "\n"+"CID-"+String(rootCid)+"\n"+"documentHAsh-"+documentHash+
+      "\n"+"DigitalSIgnature-"+digitalSignature+"\n"+"studentemail-"+studentemail
+    )
+    //console.log(typeof(documentHash),typeof(digitalSignature))
+    
     try {
-      // Interact with smart contract (replace 'abi' and contract methods with actual contract details)
       await abi.methods.uploadDocument(
-        issueremail, // Issuer's email
-        selectedFile.name, // File name
-        String(rootCid),   // File CID
-        issueremail, // Issuer's email again (replace if different)
-        studentemail // Student's email
-      ).send({ from: account,gas:300000});
+          issueremail,
+          selectedFile.name,
+          String(rootCid),
+          documentHash,
+          digitalSignature,
+          issueremail,
+          studentemail
+      ).send({ from: account});
       alert('Document successfully uploaded to the smart contract!');
-    } catch (error) {
+  } catch (error) {
       console.error('Error interacting with smart contract:', error);
-    }
-      
-  /*
+  }
+     
+  
     // Sending an email notification using Axios
     const fullPath = document.getElementById("pdfFile1").value;
     const startIndex = fullPath.lastIndexOf('\\') + 1;
@@ -129,7 +136,7 @@ const IssuerForm = () => {
     .catch(error => {
       console.error('Error sending email notification:', error);
     });
-    */
+    
   };
   
   const getname=()=>{
@@ -139,50 +146,110 @@ const IssuerForm = () => {
     const fileName = fullPath.slice(startIndex); // Get the file name after the last backslash
     setFile(fileName);
   }
-  const encryptpdf=()=>{
-
-    
+  const encryptpdf = async () => {
     const fileInput = document.getElementById('pdfFile1');
-    const selectedFile = fileInput.files[0];
+    console.log(fileInput.files[0])
+    const selectedFile = fileInput.files[0]; // Get the first selected file
 
-    axios.get("http://127.0.0.1:5000/encryptpdf",{
-      params:{
-        param1:selectedFile.name,
-        param2:selectedFile.name,
-        param3:"Nk@12351235"
-      }
-    }).then(response=>{
-      
-    })
-  
-}
+    if (!selectedFile) {
+        alert("Please select a PDF file to encrypt.");
+        return;
+    }
+
+    if(!password)
+        {
+          alert("Please enter password for encryption")
+          return ;
+        }
+    // Validate that the selected file is a PDF
+    const validFileTypes = ['application/pdf'];
+    if (!validFileTypes.includes(selectedFile.type)) {
+        alert("Please select a valid PDF file.");
+        return;
+    }
+    alert(password)
+    // Create FormData to send the file and parameters
+    const formData = new FormData();
+    formData.append('file', selectedFile); // Append the selected file
+    formData.append('param1', selectedFile.name); // Append the file name for input
+    formData.append('param2', `encrypted_${selectedFile.name}`); // Name for the output file
+    formData.append('param3', password); // Password for encryption
+
+    try {
+        // Show loading indicator
+        alert("Encrypting your PDF. Please wait...");
+
+        // Send the POST request to the Flask backend
+        const response = await axios.post("http://127.0.0.1:5000/encryptpdf", formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data', // Set content type for form data
+            },
+        });
+
+        // Handle response
+        if (response.data.success) {
+            alert("PDF encrypted successfully!");
+
+            // Optionally, provide a download link or functionality for the encrypted PDF
+            // Assuming the response contains the download URL or you provide a direct download option
+            // const downloadLink = document.createElement('a');
+            // downloadLink.href = response.data.download_url; // Adjust according to your Flask response
+            // downloadLink.download = response.data.param2; // File name for download
+            // document.body.appendChild(downloadLink);
+            // downloadLink.click();
+            // document.body.removeChild(downloadLink);
+        } else {
+            alert("Encryption failed: " + response.data.message);
+        }
+    } catch (error) {
+        console.error("Error encrypting PDF:", error);
+        alert("An error occurred while encrypting the PDF.");
+    }
+};
+
   async function onSubmit(data) {
     const fileInput = document.getElementById('pdfFile');
    const imagepath=await abi.methods.getImagePath(issueremail).call()
-   alert(imagepath.imageID)
-   // Define the data you want to pass
-    
-    //alert(imagepath.imageID,"Sadas")
+
 const requestData = {
   param1: fileInput.files[0].name
 }
 
+  let digitalSignature,documentHash;
+  console.log(fileInput.files[0].name)
    // Make a GET request with the data as query parameters
 axios.get('http://localhost:3000/generate_digital_signature', {
   params:requestData
 })
   .then(response => {
-    // Handle the response
-    setDigitalSignature(response.data.digitalSignature)
-    //document.getElementById("digital_signature").innerHTML=response.data.digitalSignature
-    //alert(response.data.digitalSignature);
+   
+    digitalSignature=response.data.digitalSignature;
+   
   })
   .catch(error => {
     // Handle errors
     console.error('Error:', error.message);
   });
 
+  try {
+    // Make the GET request to your API
+    const response = await axios.get('http://localhost:3000/create_hash_document', {
+      params: {
+        filePath: fileInput.files[0].name
+      }
+    });
 
+    // If the response is successful, set the document hash
+    if (response.data.documentHash) {
+      documentHash=response.data.documentHash ;
+     
+    }
+  } catch (err) {
+ console.log("Error in finding Hash of document")
+  }
+
+//  console.log(digitalSignature)
+ //   storage(digitalSignature,documentHash)
   
 //storage()
   //console.log(imagepath.imageName)
@@ -193,8 +260,8 @@ axios.get('http://localhost:3000/generate_digital_signature', {
 
   }})
   .then(response=>{
-    storage()
-   // alert("Face Matched")
+    storage(digitalSignature,documentHash)
+    alert("Face Matched")
       
 
   }).catch(error)
@@ -212,7 +279,9 @@ axios.get('http://localhost:3000/generate_digital_signature', {
         <Stack spacing={8} mx={"auto"} maxW={"2xl"} py={12} px={6} my={20}>
           <Text fontSize={"lg"} color={"teal.400"}>
             <ArrowBackIcon mr={2} />
-            <Link to="/is-registered/issuer">Go Back</Link>
+            <Button onClick={()=>navigate('/is-registered/issuer',{
+  state:issueremail
+})}>Go Back</Button>
           </Text>
 
           <Stack>
@@ -249,7 +318,16 @@ axios.get('http://localhost:3000/generate_digital_signature', {
                     isDisabled={isSubmitting}
                   />
                 </FormControl>
+                <FormControl id="password">
+                  <FormLabel>Password for encryption of file</FormLabel>
+                  <Input
+                    {...register("password", { required: true })}
+                    isDisabled={isSubmitting}
 
+                    type="password"
+                    onChange={(e)=>setPassword(e.target.value)}
+                  />
+                </FormControl>
                 <FormControl id="doc">
                   <FormLabel>File Upload</FormLabel>
                   <input type="file" id="pdfFile1" name="pdfFile" accept=".pdf" required onChange={()=>encryptpdf()}/>
@@ -303,11 +381,7 @@ axios.get('http://localhost:3000/generate_digital_signature', {
               </Stack>
             </form>
           </Box>
-          {digitalsignature!=""?
-          <div id="digital_signature"><h1 className="text-2xl text-center">Digital Signature</h1>
-            <p>{digitalsignature}</p>
-          </div>:""
-}
+          
         </Stack>
       </main>
       

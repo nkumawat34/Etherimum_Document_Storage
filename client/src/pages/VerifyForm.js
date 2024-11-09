@@ -23,7 +23,8 @@ import {
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-
+import Web3 from 'web3'
+import abi from "./abi_contractaddress";
 import axios from "axios";
 
 //import { useMetamask } from "../hooks/useMetamask";
@@ -45,15 +46,66 @@ const VerifyForm = () => {
  
   //const inputRef = useRef();
   //const toast = useToast();
-  const [digitalSignature,setDigitalSignature]=useState("")
   async function onSubmit(data) {
     //const formData = new FormData();
     const fileInput = document.getElementById('pdfFile');
    // formData.append("certificate", inputRef.current.files[0]);
+   
+    let documentHash,digitalSignature;
+    
+   try {
+    // Make the GET request to your API
+    const response = await axios.get('http://localhost:3000/create_hash_document', {
+      params: {
+        filePath: fileInput.files[0].name
+      }
+    });
+  
+    // If the response is successful, set the document hash
+    if (response.data.documentHash) {
+      documentHash=(response.data.documentHash)
+     
+    }
+  } catch (err) {
+  console.log("Error in finding Hash of document")
+  }
+  
+ 
+  try {
+    // Check if the Ethereum provider is available
+    if (typeof window.ethereum !== 'undefined') {
+        const provider = window.ethereum;
+
+        // Request account access if needed
+        await provider.request({ method: 'eth_requestAccounts' });
+
+        // Create a new Web3 instance
+        const web3 = new Web3(provider);
+
+        // Get the user's accounts
+        const accounts = await web3.eth.getAccounts();
+        const account = accounts[0];
+     
+        // Call the smart contract method
+        const res = await abi.methods.verifyDocument(data.Issued_by,documentHash).call({ from: account });
+        //console.log(res)
+        console.log(res)
+       digitalSignature=res;
+    } else {
+        console.error('Ethereum provider is not available. Make sure you have MetaMask installed.');
+    }
+} catch (error) {
+    console.error('Error fetching documents:', error);
+}  
+
 const requestData = {
   param1: fileInput.files[0].name,
-  param2:digitalSignature
+  param2:digitalSignature,
+  param3:documentHash
 }
+
+
+
    axios.get('http://localhost:3000/verify_digital_signature', {
   params:requestData
 })
@@ -68,7 +120,7 @@ const requestData = {
     // Handle errors
     console.error('Error:', error.message);
   });
-   
+  
    
   }
 
@@ -98,6 +150,7 @@ const requestData = {
                   <Input
                     {...register("Issued_by", { required: true })}
                     isDisabled={isSubmitting}
+                    
                   />
                 </FormControl>
 
@@ -106,15 +159,6 @@ const requestData = {
                   <Input
                     {...register("Issued_to", { required: true })}
                     isDisabled={isSubmitting}
-                  />
-                </FormControl>
-
-                <FormControl id="UUID">
-                  <FormLabel>Digital Signature</FormLabel>
-                  <Input
-                    {...register("UUID", { required: true })}
-                    isDisabled={isSubmitting}
-                     onChange={(e)=>setDigitalSignature(e.target.value)}
                   />
                 </FormControl>
 

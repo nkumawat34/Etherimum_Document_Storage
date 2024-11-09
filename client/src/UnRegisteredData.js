@@ -17,7 +17,7 @@ const options = [
         desc: "Upload a New Certificate",
         imageURL: "/images/university.jpg",
     },
-    {
+    /*{
         id:"faculty",
         name:"Faculty",
         desc:"View all certificates uploaded by faculty",
@@ -25,7 +25,7 @@ const options = [
 
 
 
-    }
+    }*/
 ]
 
 export default options;
