@@ -6,6 +6,23 @@ import fs from 'fs'
 import crypto from 'crypto'
 app.use(cors()) // Use this after the variable declaration
 import nodemailer from 'nodemailer'
+import multer from 'multer';
+
+// Set up multer with custom storage to preserve the original filename
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Specify upload folder
+  },
+  filename: (req, file, cb) => {
+    // Use the original file name
+    cb(null, file.originalname); // You can also customize this if needed
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
+});
 
 function signDocument(privateKeyPath, documentPath) {
     // Read the private key
@@ -94,14 +111,36 @@ sendEmail(email);
 });
 
 
+// POST endpoint to verify the digital signature
 app.get('/verify_digital_signature', (req, res) => {
-    const publicKeyPath = 'public_key.pem';
-const documentPath = String(req.query.param1);
-const digitalSignature = String(req.query.param2); // Provide the digital signature to be verified
 
-const isSignatureValid = verifySignature(publicKeyPath, documentPath, digitalSignature);
-    res.json({ isSignatureValid: isSignatureValid });
-  });
+
+  //console.log(req.query.nk)
+  
+  const digitalSignature=req.query.digitalSignature;
+  const documentName=req.query.documentName;
+
+  if (!digitalSignature || !documentName) {
+    return res.status(400).json({ error: 'Digital signature and document name are required.' });
+  }
+
+  const documentPath = documentName; // Use the document name as the path to the file
+  const publicKeyPath = 'public_key.pem'; // Path to the public key file
+
+  try {
+    // Call your verifySignature function here (ensure it's implemented properly)
+    const isSignatureValid = verifySignature(publicKeyPath, documentPath, digitalSignature);
+
+    // Send the response back to the client
+    res.json({ isSignatureValid });
+
+  } catch (error) {
+    console.error('Error during signature verification:', error);
+    res.status(500).json({ error: 'Error during signature verification', details: error.message });
+  }
+    
+});
+
 
 // Helper function to create SHA-256 hash of a file
 function hashDocument(filePath) {
@@ -117,23 +156,24 @@ function hashDocument(filePath) {
 }
 
 // Create an endpoint to generate document hash
-app.get('/create_hash_document', (req, res) => {
+app.post('/create_hash_document',upload.single('file'), (req, res) => {
   // Get file path from query parameter
-  const { filePath } = req.query;
-
+  const file = req.file;
+//console.log(file.path)
   // Check if file path is provided
-  if (!filePath) {
+  if (!file) {
       return res.status(400).send('Please provide a file path');
   }
 
   // Check if the file exists
-  if (!fs.existsSync(filePath)) {
+  if (!fs.existsSync(file.path)) {
       return res.status(404).send('File not found');
   }
-
+  //console.log(file.path)
+  
   try {
       // Generate the hash for the document
-      const documentHash = hashDocument(filePath);
+      const documentHash = hashDocument(file.path);
 
       // Return the document hash
       res.status(200).json({
@@ -143,6 +183,7 @@ app.get('/create_hash_document', (req, res) => {
   } catch (error) {
       res.status(500).send('Error generating document hash');
   }
+      
 }); 
 // Start the server
 app.listen(port, () => {

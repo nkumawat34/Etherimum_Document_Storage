@@ -49,27 +49,30 @@ const VerifyForm = () => {
   async function onSubmit(data) {
     //const formData = new FormData();
     const fileInput = document.getElementById('pdfFile');
-   // formData.append("certificate", inputRef.current.files[0]);
+    const formData = new FormData();
+    console.log(fileInput.files[0])
+    // Append the file to formData
+    formData.append("file", fileInput.files[0]);
    
     let documentHash,digitalSignature;
-    
-   try {
-    // Make the GET request to your API
-    const response = await axios.get('http://localhost:3000/create_hash_document', {
-      params: {
-        filePath: fileInput.files[0].name
+    try {
+      // Make the POST request to your API
+      const response = await axios.post('http://localhost:3000/create_hash_document', formData, {
+          headers: {
+              'Content-Type': 'multipart/form-data'
+          }
+      });
+
+      // If the response is successful, set the document hash
+      if (response.data.documentHash) {
+          documentHash = response.data.documentHash;
+          console.log('Document Hash:', documentHash);
       }
-    });
-  
-    // If the response is successful, set the document hash
-    if (response.data.documentHash) {
-      documentHash=(response.data.documentHash)
-     
-    }
   } catch (err) {
-  console.log("Error in finding Hash of document")
+      console.log("Error in finding Hash of document", err);
   }
-  
+
+  console.log(documentHash,data.Issued_by)
  
   try {
     // Check if the Ethereum provider is available
@@ -95,33 +98,53 @@ const VerifyForm = () => {
         console.error('Ethereum provider is not available. Make sure you have MetaMask installed.');
     }
 } catch (error) {
-    console.error('Error fetching documents:', error);
+  if (error.message.includes('Document not found or hash mismatch')) {
+    alert("Not Verified")
+  } else {
+    console.error('An unexpected error occurred:', error);
+  }
 }  
+//const formData2 = new FormData();
+//console.log(fileInput.files[0]);
+//fileInput.files[0].nk="nk"
+// Append the file to formData
+//formData2.append("file", fileInput.files[0]);
+//console.log(fileInput.files[0].name)
+// Append additional data (digitalSignature and documentHash) to formData
+//formData2.append("digitalSignature", digitalSignature);
+//formData2.append("documentHash", documentHash);
 
-const requestData = {
-  param1: fileInput.files[0].name,
-  param2:digitalSignature,
-  param3:documentHash
-}
+// Sending the request using POST
+// Make a GET request with query parameters
 
-
-
-   axios.get('http://localhost:3000/verify_digital_signature', {
-  params:requestData
-})
+// Sending the request using POST with the body containing the data
+axios.get(`http://localhost:3000/verify_digital_signature`,
+  {params:
+    {
+      digitalSignature:digitalSignature,
+      documentName:"uploads/"+fileInput.files[0].name
+    }
+  }
+)
   .then(response => {
     // Handle the response
-    if(response.data.isSignatureValid)
-      alert("Verified")
-    else
-      alert("Not verified")
+    if (response.data.isSignatureValid) {
+      alert("Verified");
+    } else {
+      alert("Not verified");
+    }
   })
   .catch(error => {
     // Handle errors
     console.error('Error:', error.message);
   });
-  
-   
+
+const formData2= new FormData();
+formData2.append("digitalSignature", digitalSignature);
+formData2.append("documentName", "uploads/" + fileInput.files[0].name);
+
+
+
   }
 
   return (

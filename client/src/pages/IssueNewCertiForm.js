@@ -167,7 +167,7 @@ const IssuerForm = () => {
         alert("Please select a valid PDF file.");
         return;
     }
-    alert(password)
+   // alert(password)
     // Create FormData to send the file and parameters
     const formData = new FormData();
     formData.append('file', selectedFile); // Append the selected file
